@@ -45,30 +45,14 @@ public class TakeFirstProjectorFactory implements AccumulateProjectorFactory<ARG
         @Override
         protected void accumulate(final Cursor< ? extends ARGBType >[] accesses, final ARGBType target )
         {
-            int aSum = 0, rSum = 0, gSum = 0, bSum = 0;
 
-            //for ( final Cursor< ? extends ARGBType > access : accesses )
-            final Cursor< ? extends ARGBType > access = accesses[0];
-            {
-                final int value = access.get().get();
-                final int a = ARGBType.alpha( value );
-                final int r = ARGBType.red( value );
-                final int g = ARGBType.green( value );
-                final int b = ARGBType.blue( value );
-                aSum += a;
-                rSum += r;
-                gSum += g;
-                bSum += b;
-            }
-            if ( aSum > 255 )
-                aSum = 255;
-            if ( rSum > 255 )
-                rSum = 255;
-            if ( gSum > 255 )
-                gSum = 255;
-            if ( bSum > 255 )
-                bSum = 255;
-            target.set( ARGBType.rgba( rSum, gSum, bSum, aSum ) );
+            final int value = accesses[0].get().get();
+            final int a = ARGBType.alpha( value );
+            final int r = ARGBType.red( value );
+            final int g = ARGBType.green( value );
+            final int b = ARGBType.blue( value );
+
+            target.set( ARGBType.rgba( r, g, b, a ) );
         }
     }
 }

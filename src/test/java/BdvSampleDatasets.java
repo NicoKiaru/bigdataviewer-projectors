@@ -44,7 +44,7 @@ public class BdvSampleDatasets {
 
     public static BdvHandle twentyFiveImages(BdvOptions options) {
         // Display 2 sources shifted in space
-        System.out.print("100 Images\t");
+        System.out.print("25 Images\t");
         String fn = "src/test/resources/mri-stack.xml";
         SpimDataMinimal spimData = null;
         try {

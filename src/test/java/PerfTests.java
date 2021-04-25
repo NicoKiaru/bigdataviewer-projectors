@@ -27,7 +27,7 @@ public class PerfTests {
 
         test(new DefaultProjectorFactory(), BdvSampleDatasets::twentyFiveImages);
         test(new SlowProjectorFactory(), BdvSampleDatasets::twentyFiveImages);
-        test(new TakeFirstProjectorFactory(), BdvSampleDatasets::twentyFiveImages);
+        test(new TakeFirstProjectorFactory(), BdvSampleDatasets::twentyFiveImages); // Surprisingly slow : the projector does not care so much about how many sources it projects
 
     }
 
