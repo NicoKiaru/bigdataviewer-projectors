@@ -9,11 +9,14 @@ import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.ARGBType;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 public class DefaultProjectorFactory implements AccumulateProjectorFactory<ARGBType> {
+
+    public DefaultProjectorFactory() {
+        System.out.print(this.getClass()+"\t");
+    }
 
     public VolatileProjector createProjector(
             final List< VolatileProjector > sourceProjectors,

@@ -10,7 +10,7 @@ import net.imglib2.realtransform.AffineTransform3D;
 
 import java.awt.image.BufferedImage;
 
-public class PerfTester {
+public class BdvProbeFPS {
 
     public static void acquireFrames(final int width, final int height, final int nFrames, ViewerPanel viewer) {
         final ViewerState renderState = new BasicViewerState( viewer.state().snapshot() );
@@ -88,7 +88,7 @@ public class PerfTester {
     public static double getStdMsPerFrame(BdvHandle bdvh) {
         int nRepetitions = 25;
         long timeIn = System.currentTimeMillis();
-        PerfTester.acquireFrames(640, 480, nRepetitions, bdvh.getViewerPanel());
+        BdvProbeFPS.acquireFrames(640, 480, nRepetitions, bdvh.getViewerPanel());
         long timeOut = System.currentTimeMillis();
 
         return ((timeOut-timeIn)/(double)nRepetitions);

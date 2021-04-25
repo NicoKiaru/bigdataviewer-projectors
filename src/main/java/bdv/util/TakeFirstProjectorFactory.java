@@ -13,9 +13,9 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class SlowProjectorFactory implements AccumulateProjectorFactory<ARGBType> {
+public class TakeFirstProjectorFactory implements AccumulateProjectorFactory<ARGBType> {
 
-    public SlowProjectorFactory() {
+    public TakeFirstProjectorFactory() {
         System.out.print(this.getClass()+"\t");
     }
 
@@ -42,19 +42,13 @@ public class SlowProjectorFactory implements AccumulateProjectorFactory<ARGBType
             super( sourceProjectors, sources, target, numThreads, executorService );
         }
 
-        AtomicInteger the_integer = new AtomicInteger();
-
         @Override
         protected void accumulate(final Cursor< ? extends ARGBType >[] accesses, final ARGBType target )
         {
             int aSum = 0, rSum = 0, gSum = 0, bSum = 0;
 
-            // Stupid time penalty
-            for (int i=0;i<50;i++) {
-                the_integer.incrementAndGet();
-            }
-
-            for ( final Cursor< ? extends ARGBType > access : accesses )
+            //for ( final Cursor< ? extends ARGBType > access : accesses )
+            final Cursor< ? extends ARGBType > access = accesses[0];
             {
                 final int value = access.get().get();
                 final int a = ARGBType.alpha( value );
