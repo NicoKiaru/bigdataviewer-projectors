@@ -7,6 +7,7 @@ import net.imglib2.*;
 import net.imglib2.position.FunctionRandomAccessible;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.type.volatiles.VolatileFloatType;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.Views;
 
@@ -62,6 +63,7 @@ public class SourceAlpha implements Source<FloatType> {
 
     @Override
     public RealRandomAccessible<FloatType> getInterpolatedSource(int t, int level, Interpolation method) {
+
         ExtendedRandomAccessibleInterval<FloatType, RandomAccessibleInterval< FloatType >>
                 eView = Views.extendZero(getSource( t, level ));
         RealRandomAccessible< FloatType > realRandomAccessible = Views.interpolate( eView, interpolators.get(method) );

@@ -35,7 +35,7 @@ public class PerfTests {
     /**
      * Close the bdv frame after testing ?
      */
-    public static boolean closeAfterTest = false;
+    public static boolean closeAfterTest = true;
 
     public static void main(final String... args) {
 

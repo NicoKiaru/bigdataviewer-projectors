@@ -8,6 +8,7 @@ public class WeirdIssueAccumulatorIgnored {
 
     public static void main(final String... args) {
         test(new BlackProjectorFactory(), BdvSampleDatasets::oneImage); // We got an image!!!
+        // This is because no projector is used when a single image is displayed...
         test(new BlackProjectorFactory(), BdvSampleDatasets::twoImages); // No image, as expected
     }
 

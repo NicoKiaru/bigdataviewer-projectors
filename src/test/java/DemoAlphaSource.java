@@ -6,14 +6,40 @@ import mpicbg.spim.data.generic.AbstractSpimData;
 import net.imglib2.type.numeric.real.FloatType;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DemoAlphaSource {
     static BdvHandle bdvh;
 
+    static Map<SourceAndConverter, SourceAndConverter> sourceToAlpha = new ConcurrentHashMap<>();
+
     public static void main(final String... args) {
         BdvOptions options = BdvOptions.options();
         //options = options.accumulateProjectorFactory(new DefaultProjectorFactory());
-        options = options.accumulateProjectorFactory(new BasicAlphaProjectorFactory());
+        options = options.accumulateProjectorFactory(new AlphaProjectorFactory(new AlphaProjectorFactory.SourcesMetadata() {
+            @Override
+            public boolean isAlphaSource(SourceAndConverter sac) {
+                if (sourceToAlpha.containsValue(sac)) return true;
+                return false;
+            }
+
+            @Override
+            public boolean hasAlphaSource(SourceAndConverter sac) {
+                if (sourceToAlpha.containsKey(sac)) {
+                    return sourceToAlpha.get(sac) != null;
+                }
+                return false;
+            }
+
+            @Override
+            public SourceAndConverter getAlphaSource(SourceAndConverter sac) {
+                if (sourceToAlpha.containsKey(sac)) {
+                    return sourceToAlpha.get(sac);
+                }
+                return null;
+            }
+        }));
 
         MaskConverter mc = new MaskConverter();
 
@@ -32,6 +58,8 @@ public class DemoAlphaSource {
         bdvh.getViewerPanel().state().addSource(alpha_sac); // No converter setup
         bdvh.getViewerPanel().state().setSourceActive(alpha_sac, true);
 
+        sourceToAlpha.put(bdvh.getViewerPanel().state().getSources().get(0), alpha_sac);
+
         sd = BdvSampleDatasets.getTestSpimData();
 
         BdvSampleDatasets.shiftSpimData((SpimDataMinimal) sd,20,0);
@@ -45,6 +73,8 @@ public class DemoAlphaSource {
 
         bdvh.getViewerPanel().state().addSource(alpha_sac); // No converter setup
         bdvh.getViewerPanel().state().setSourceActive(alpha_sac, true);
+
+        sourceToAlpha.put(bdvh.getViewerPanel().state().getSources().get(2), alpha_sac);
 
     }
 }
