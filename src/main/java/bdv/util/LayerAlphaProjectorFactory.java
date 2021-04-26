@@ -65,7 +65,7 @@ public class LayerAlphaProjectorFactory implements AccumulateProjectorFactory<AR
 
             // Let's sort which sources are alpha, which are not, and which contain alpha channels, actually present in the projector
             for (int index_source=0; index_source<sources.size(); index_source++) {
-                SourceAndConverter source = sources.get(index_source);
+                SourceAndConverter<?> source = sources.get(index_source);
                 int index_alpha_source;
                 if (sourcesMeta.isAlphaSource(source)) {
                     source_is_alpha[index_source] = true;
@@ -108,42 +108,16 @@ public class LayerAlphaProjectorFactory implements AccumulateProjectorFactory<AR
             for (int i=0;i<sources.size();i++) {
                 int source_index = sources_sorted_indices[i];
                 Layer current_layer = layer_array[source_index];
-                System.out.println("-- "+i+":"+source_index);
-                System.out.println("Source name = "+sources.get(source_index).getSpimSource().getName());
-                System.out.println("Current Layer Id = "+current_layer.getId());
-                System.out.println("Should be equal to "+layerMeta.getLayer(sources.get(source_index)).getId());
                 source_layer_skip[source_index] = current_layer.skip();
                 source_layer_alpha[source_index] = current_layer.getAlpha();
                 source_layer_mode[source_index] = current_layer.getBlendingMode();
                 if (i==sources.size()-1) {
-                    System.out.println("Last : true");
-                    source_layer_next[source_index] = true;
+                    source_layer_next[source_index] = true; // Last source : need to draw this last layer
                 } else {
-                    System.out.println("i="+i+" source_index="+source_index+" next source index = "+sources_sorted_indices[i+1]);
-                    System.out.println("current layer id = "+current_layer.getId());
-                    System.out.println("next layer id = "+layer_array[sources_sorted_indices[i+1]].getId());
                     source_layer_next[source_index] = ((current_layer.getId())!=(layer_array[sources_sorted_indices[i+1]].getId()));
                 }
 
-                System.out.println("source_layer_alpha["+source_index+"] = "+source_layer_alpha[source_index]);
-                System.out.println("source_layer_mode["+source_index+"] = "+source_layer_mode[source_index]);
-                System.out.println("source_layer_next["+source_index+"] = "+source_layer_next[source_index]);
-                System.out.println("source_layer_skip["+source_index+"] = "+source_layer_skip[source_index]);
             }
-
-            System.out.println("---------------");
-            for (int iSource = 0;iSource<sources.size();iSource++) {
-                System.out.println("is_alpha["+iSource+"] = "+ source_is_alpha[iSource]);
-                System.out.println("has_alpha["+iSource+"] = "+ source_has_alpha[iSource]);
-                System.out.println("sources_alpha_index["+iSource+"] = "+ source_linked_alpha_source_index[iSource]);
-                //System.out.println("sources_sorted_indices["+iSource+"] = "+sources_sorted_indices[iSource]);
-                System.out.println("source_layer_alpha["+iSource+"] = "+source_layer_alpha[iSource]);
-                System.out.println("source_layer_mode["+iSource+"] = "+source_layer_mode[iSource]);
-                System.out.println("source_layer_next["+iSource+"] = "+source_layer_next[iSource]);
-                System.out.println("source_layer_skip["+iSource+"] = "+source_layer_skip[iSource]);
-                System.out.println("--");
-            }
-            System.out.println("---------------");
 
         }
 
@@ -154,8 +128,10 @@ public class LayerAlphaProjectorFactory implements AccumulateProjectorFactory<AR
             int aLayer = 0, rLayer = 0, gLayer = 0, bLayer = 0;
 
             // Initialisation before the loop
-            int current_source_index = sources_sorted_indices[0];
-            boolean skip_current_layer = source_layer_skip[current_source_index];
+            int current_source_index;
+            boolean skip_current_layer;
+            int nSources = 0;
+            float totalAlpha = 0;
 
             for (int i=0;i<accesses.length;i++) {
                 current_source_index = sources_sorted_indices[i];
@@ -176,6 +152,8 @@ public class LayerAlphaProjectorFactory implements AccumulateProjectorFactory<AR
                             rLayer += r;
                             gLayer += g;
                             bLayer += b;
+                            if (alpha>0) nSources++;
+                            totalAlpha+=alpha;
                         } else {
                             // No alpha channel: standard sum
                             final int value = accesses[current_source_index].get().get();
@@ -188,22 +166,28 @@ public class LayerAlphaProjectorFactory implements AccumulateProjectorFactory<AR
                             rLayer += r;
                             gLayer += g;
                             bLayer += b;
+                            nSources++;
+                            totalAlpha+=1;
                         }
                     }
                 }
                 if (source_layer_next[current_source_index]) {
                     // Append layer value
-                    if (!skip_current_layer) {
-                        float alpha = source_layer_alpha[current_source_index];
-                        aSum = (int)((1-alpha)*aSum+alpha*aLayer);
-                        rSum = (int)((1-alpha)*rSum+alpha*rLayer);
-                        gSum = (int)((1-alpha)*gSum+alpha*gLayer);
-                        bSum = (int)((1-alpha)*bSum+alpha*bLayer);
+                    if (nSources>0) {
+                        if (!skip_current_layer) {
+                            float alpha = source_layer_alpha[current_source_index] * totalAlpha / (float) nSources;
+                            aSum = (int)((1-alpha)*aSum+alpha*aLayer);
+                            rSum = (int)((1-alpha)*rSum+alpha*rLayer);
+                            gSum = (int)((1-alpha)*gSum+alpha*gLayer);
+                            bSum = (int)((1-alpha)*bSum+alpha*bLayer);
+                        }
                     }
                     aLayer = 0;
                     rLayer = 0;
                     gLayer = 0;
                     bLayer = 0;
+                    nSources = 0;
+                    totalAlpha = 0;
                 }
             }
 
@@ -220,13 +204,13 @@ public class LayerAlphaProjectorFactory implements AccumulateProjectorFactory<AR
     }
 
     public interface SourcesMetadata {
-        boolean isAlphaSource(SourceAndConverter sac);
-        boolean hasAlphaSource(SourceAndConverter sac);
-        SourceAndConverter getAlphaSource(SourceAndConverter sac);
+        boolean isAlphaSource(SourceAndConverter<?> sac);
+        boolean hasAlphaSource(SourceAndConverter<?> sac);
+        SourceAndConverter<?> getAlphaSource(SourceAndConverter<?> sac);
     }
 
     public interface LayerMetadata {
-        Layer getLayer(SourceAndConverter sac);
+        Layer getLayer(SourceAndConverter<?> sac);
     }
 
     public interface Layer extends Comparable<Layer> {

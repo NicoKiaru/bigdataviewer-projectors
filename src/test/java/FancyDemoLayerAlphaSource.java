@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class DemoLayerAlphaSource {
+public class FancyDemoLayerAlphaSource {
 
     static BdvHandle bdvh;
 
@@ -51,7 +51,7 @@ public class DemoLayerAlphaSource {
 
         List<LayerAlphaProjectorFactory.Layer> layers = new ArrayList<>();
         layers.add(new DefaultLayer(1f, 0, true));
-        layers.add(new DefaultLayer(0.5f, 1, false));
+        layers.add(new DefaultLayer(0.4f, 1, false));
         layers.add(new DefaultLayer(0.8f, 2, false));
 
         BdvOptions options = BdvOptions.options();
@@ -89,8 +89,6 @@ public class DemoLayerAlphaSource {
                 }
             }));
 
-        MaskConverter mc = new MaskConverter();
-
         AbstractSpimData sd = BdvSampleDatasets.getTestSpimData();
 
         List<BdvStackSource<?>> stackSources = BdvFunctions.show(sd, options);
@@ -99,32 +97,41 @@ public class DemoLayerAlphaSource {
         bdvh = stackSources.get(0).getBdvHandle();
 
         Source<FloatType> alpha = new SourceAlpha(stackSources.get(0).getSources().get(0).getSpimSource(), 1f);
-
         SourceAndConverter<FloatType> alpha_sac =
-                new SourceAndConverter<>(alpha, mc);
+                new SourceAndConverter<>(alpha, new MaskConverter());
 
         bdvh.getViewerPanel().state().addSource(alpha_sac); // No converter setup
         bdvh.getViewerPanel().state().setSourceActive(alpha_sac, true);
-
         sourceToAlpha.put(bdvh.getViewerPanel().state().getSources().get(0), alpha_sac);
         sourceToLayer.put(bdvh.getViewerPanel().state().getSources().get(0), layers.get(1));
 
-        sd = BdvSampleDatasets.getTestSpimData();
+        for (int x=0;x<5;x++) {
+            for (int y=0;y<5;y++) {
+                appendTestSpimdata(bdvh, 200*x, 200*y, layers.get( (x+y) % 2 + 1));
+            }
+        }
 
-        BdvSampleDatasets.shiftSpimData((SpimDataMinimal) sd,20,0);
+    }
 
-        stackSources = BdvFunctions.show(sd, options.addTo(bdvh));
+    private static void appendTestSpimdata(BdvHandle bdvh, float x, float y, LayerAlphaProjectorFactory.Layer layer) {
+        SpimDataMinimal sd = BdvSampleDatasets.getTestSpimData();
+
+        BdvSampleDatasets.shiftSpimData( sd,(int)x,(int)y);
+
+        List<BdvStackSource<?>> stackSources = BdvFunctions.show(sd, BdvOptions.options().addTo(bdvh));
         stackSources.get(0).setDisplayRange(0,255);
 
-        SourceAlpha alpha_anim = new SourceAlpha(stackSources.get(0).getSources().get(0).getSpimSource(), 0.8f);
+        int nSources = bdvh.getViewerPanel().state().getSources().size();
 
-        alpha_sac = new SourceAndConverter<>(alpha_anim, mc);
+        SourceAlpha alpha = new SourceAlpha(bdvh.getViewerPanel().state().getSources().get(nSources-1).getSpimSource(), 1f);
+
+        SourceAndConverter<FloatType> alpha_sac = new SourceAndConverter<>(alpha, new MaskConverter());
 
         bdvh.getViewerPanel().state().addSource(alpha_sac); // No converter setup
         bdvh.getViewerPanel().state().setSourceActive(alpha_sac, true);
 
-        sourceToAlpha.put(bdvh.getViewerPanel().state().getSources().get(2), alpha_sac);
-        sourceToLayer.put(bdvh.getViewerPanel().state().getSources().get(2), layers.get(2));
+        sourceToAlpha.put(bdvh.getViewerPanel().state().getSources().get(nSources-1), alpha_sac);
+        sourceToLayer.put(bdvh.getViewerPanel().state().getSources().get(nSources-1), layer);
 
     }
 }
