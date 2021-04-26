@@ -3,8 +3,11 @@ import bdv.util.*;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import mpicbg.spim.data.generic.AbstractSpimData;
+import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.real.FloatType;
 
+import javax.swing.*;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +36,10 @@ public class FancyDemoLayerAlphaSource {
             return alpha;
         }
 
+        public void setAlpha(float alpha) {
+            this.alpha = alpha;
+        }
+
         public int getBlendingMode() {
             // 0 = SUM, 1 = AVERAGE TODO , currently only sum
             return 0;
@@ -49,8 +56,8 @@ public class FancyDemoLayerAlphaSource {
 
     public static void main(final String... args) {
 
-        List<LayerAlphaProjectorFactory.Layer> layers = new ArrayList<>();
-        layers.add(new DefaultLayer(1f, 0, true));
+        List<DefaultLayer> layers = new ArrayList<>();
+        layers.add(new DefaultLayer(1f, 0, false));
         layers.add(new DefaultLayer(0.4f, 1, false));
         layers.add(new DefaultLayer(0.8f, 2, false));
 
@@ -90,9 +97,10 @@ public class FancyDemoLayerAlphaSource {
             }));
 
         AbstractSpimData sd = BdvSampleDatasets.getTestSpimData();
-
-        List<BdvStackSource<?>> stackSources = BdvFunctions.show(sd, options);
-        stackSources.get(0).setDisplayRange(0,255);
+        AffineTransform3D at3D = new AffineTransform3D();
+        at3D.scale(20);
+        List<BdvStackSource<?>> stackSources = BdvFunctions.show(sd, options.sourceTransform(at3D));
+        stackSources.get(0).setDisplayRange(0,2);
 
         bdvh = stackSources.get(0).getBdvHandle();
 
@@ -103,13 +111,51 @@ public class FancyDemoLayerAlphaSource {
         bdvh.getViewerPanel().state().addSource(alpha_sac); // No converter setup
         bdvh.getViewerPanel().state().setSourceActive(alpha_sac, true);
         sourceToAlpha.put(bdvh.getViewerPanel().state().getSources().get(0), alpha_sac);
-        sourceToLayer.put(bdvh.getViewerPanel().state().getSources().get(0), layers.get(1));
+        sourceToLayer.put(bdvh.getViewerPanel().state().getSources().get(0), layers.get(0));
 
         for (int x=0;x<5;x++) {
             for (int y=0;y<5;y++) {
                 appendTestSpimdata(bdvh, 200*x, 200*y, layers.get( (x+y) % 2 + 1));
             }
         }
+
+        JPanel panel = new JPanel(new GridLayout(3,1));
+
+        JSlider sliderLayer1 = new JSlider();
+        sliderLayer1.setMinimum(0);
+        sliderLayer1.setMaximum(255);
+        panel.add(sliderLayer1);
+        sliderLayer1.addChangeListener(l -> {
+            int alphaValue = ((JSlider)l.getSource()).getValue();
+            //System.out.println("Alpha Layer 1 = "+alphaValue);
+            layers.get(1).setAlpha((float)(alphaValue/255.0));
+            bdvh.getViewerPanel().requestRepaint();
+        });
+
+        JSlider sliderLayer2 = new JSlider();
+        sliderLayer2.setMinimum(0);
+        sliderLayer2.setMaximum(255);
+        panel.add(sliderLayer2);
+        sliderLayer2.addChangeListener(l -> {
+            int alphaValue = ((JSlider)l.getSource()).getValue();
+            //System.out.println("Alpha Layer 2 = "+alphaValue);
+            layers.get(2).setAlpha((float)(alphaValue/255.0));
+            bdvh.getViewerPanel().requestRepaint();
+        });
+
+        JButton swapLayers = new JButton("Swap layers");
+        swapLayers.addActionListener(l -> {
+            sourceToLayer.keySet().stream().forEach((sac) -> {
+                int id = sourceToLayer.get(sac).getId();
+                if ((id==1)||(id==2)) {
+                    sourceToLayer.put(sac, layers.get(1 - (id - 1) + 1));
+                }
+            });
+            bdvh.getViewerPanel().requestRepaint();
+        });
+        panel.add(swapLayers);
+
+        bdvh.getCardPanel().addCard("Layer controls", panel, true);
 
     }
 
