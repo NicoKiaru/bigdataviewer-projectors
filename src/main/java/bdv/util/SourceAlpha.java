@@ -63,7 +63,6 @@ public class SourceAlpha implements Source<FloatType> {
 
     @Override
     public RealRandomAccessible<FloatType> getInterpolatedSource(int t, int level, Interpolation method) {
-
         ExtendedRandomAccessibleInterval<FloatType, RandomAccessibleInterval< FloatType >>
                 eView = Views.extendZero(getSource( t, level ));
         RealRandomAccessible< FloatType > realRandomAccessible = Views.interpolate( eView, interpolators.get(method) );
