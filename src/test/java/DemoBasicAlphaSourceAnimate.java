@@ -7,7 +7,12 @@ import net.imglib2.type.numeric.real.FloatType;
 
 import java.util.List;
 
-public class DemoAlphaSource {
+/**
+ * Need to understand / solve {@link WeirdIssueAccumulatorIgnored} first ...
+ */
+
+public class DemoBasicAlphaSourceAnimate {
+
     static BdvHandle bdvh;
 
     public static void main(final String... args) {
@@ -45,6 +50,24 @@ public class DemoAlphaSource {
 
         bdvh.getViewerPanel().state().addSource(alpha_sac); // No converter setup
         bdvh.getViewerPanel().state().setSourceActive(alpha_sac, true);
+
+        Thread animate_alpha = new Thread(() -> {
+            int i=0;
+            while (true) {
+                i++;
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                float alpha_value = (float) ((1+Math.cos(i/5.0))/2.0);
+                alpha_anim.setAlpha(alpha_value);
+                bdvh.getViewerPanel().requestRepaint();
+                //System.out.println("alpha = "+alpha_value);
+            }
+        });
+
+        animate_alpha.start();
 
     }
 }

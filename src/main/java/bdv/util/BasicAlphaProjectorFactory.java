@@ -12,9 +12,9 @@ import net.imglib2.type.numeric.ARGBType;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
-public class AlphaProjectorFactory implements AccumulateProjectorFactory<ARGBType> {
+public class BasicAlphaProjectorFactory implements AccumulateProjectorFactory<ARGBType> {
 
-    public AlphaProjectorFactory(SourcesMetadata meta) {
+    public BasicAlphaProjectorFactory() {
         System.out.print(this.getClass()+"\t");
     }
 
@@ -26,22 +26,19 @@ public class AlphaProjectorFactory implements AccumulateProjectorFactory<ARGBTyp
             final int numThreads,
             final ExecutorService executorService )
     {
-
-
-        return new AccumulateProjectorARGBGeneric( sourceProjectors, sources, sourceScreenImages, targetScreenImage, numThreads, executorService );
+        return new AccumulateProjectorARGBGeneric( sourceProjectors, sourceScreenImages, targetScreenImage, numThreads, executorService );
     }
 
     public static class AccumulateProjectorARGBGeneric extends AccumulateProjector< ARGBType, ARGBType >
     {
         public AccumulateProjectorARGBGeneric(
                 final List< VolatileProjector > sourceProjectors,
-                final List<SourceAndConverter< ? >> sources,
-                final List< ? extends RandomAccessible< ? extends ARGBType > > sourceScreenImages,
+                final List< ? extends RandomAccessible< ? extends ARGBType > > sources,
                 final RandomAccessibleInterval< ARGBType > target,
                 final int numThreads,
                 final ExecutorService executorService )
         {
-            super( sourceProjectors, sourceScreenImages, target, numThreads, executorService );
+            super( sourceProjectors, sources, target, numThreads, executorService );
         }
 
         @Override
@@ -74,10 +71,4 @@ public class AlphaProjectorFactory implements AccumulateProjectorFactory<ARGBTyp
             target.set( ARGBType.rgba( rSum, gSum, bSum, aSum ) );
         }
     }
-
-    public interface SourcesMetadata {
-        boolean hasAlphaSource(SourceAndConverter sac);
-        SourceAndConverter getAlphaSource();
-    }
-
 }

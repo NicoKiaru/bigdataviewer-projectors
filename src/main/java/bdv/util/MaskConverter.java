@@ -9,8 +9,7 @@ import net.imglib2.type.numeric.real.FloatType;
  */
 public class MaskConverter implements Converter<FloatType, ARGBType> {
     @Override
-    public void convert(FloatType input, ARGBType output) {
-        //output.set(ARGBType.rgba(255,255,255,120));
+    final public void convert(FloatType input, ARGBType output) {
         output.set(Float.floatToIntBits(input.get()));
     }
 
