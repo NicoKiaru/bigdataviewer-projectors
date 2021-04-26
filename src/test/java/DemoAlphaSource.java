@@ -7,14 +7,15 @@ import net.imglib2.type.numeric.real.FloatType;
 import java.util.List;
 
 /**
- * Cannot be tested yet, need to understand / solve {@link WeirdIssueAccumulatorIgnored} first ...
+ * Need to understand / solve {@link WeirdIssueAccumulatorIgnored} first ...
  */
 
 public class DemoAlphaSource {
 
     public static void main(final String... args) {
         BdvOptions options = BdvOptions.options();
-        options = options.accumulateProjectorFactory(new SlowProjectorFactory());
+        //options = options.accumulateProjectorFactory(new DefaultProjectorFactory());
+        options = options.accumulateProjectorFactory(new AlphaProjectorFactory());
 
         AbstractSpimData sd = BdvSampleDatasets.getTestSpimData();
 
@@ -23,9 +24,27 @@ public class DemoAlphaSource {
 
         BdvHandle bdvh = stackSources.get(0).getBdvHandle();
 
-        //Source<FloatType> alpha = new SourceAlpha(stackSources.get(0).getSources().get(0).getSpimSource(), 0.5f);
-        //SourceAndConverter<FloatType> alpha_sac = new SourceAndConverter<>(alpha, new MaskConverter());
+        Source<FloatType> alpha = new SourceAlpha(stackSources.get(0).getSources().get(0).getSpimSource(), 0.5f);
+        //Source<VolatileFloatType> alpha_volatile = new VolatileBdvSource<>(alpha, new VolatileFloatType(), new SharedQueue(2));
 
+        //SourceAndConverter<VolatileFloatType> volatile_alpha_sac =
+        //        new SourceAndConverter<>(alpha_volatile, new VolatileMaskConverter());
+
+        //SourceAndConverter<FloatType> alpha_sac =
+        //        new SourceAndConverter<>(alpha, new MaskConverter(), volatile_alpha_sac);
+
+        SourceAndConverter<FloatType> alpha_sac =
+                new SourceAndConverter<>(alpha, new MaskConverter());
+
+        bdvh.getViewerPanel().state().addSource(alpha_sac); // No converter setup
+        bdvh.getViewerPanel().state().setSourceActive(alpha_sac, true);
+
+       /* sd = BdvSampleDatasets.getTestSpimData();
+
+        stackSources = BdvFunctions.show(sd, options.addTo(bdvh));
+        stackSources.get(0).setDisplayRange(0,255);*/
+
+        //alpha_sac = new SourceAndConverter<>(alpha, new MaskConverter());
         //bdvh.getViewerPanel().state().addSource(alpha_sac); // No converter setup
 
         //BdvFunctions.show(alpha);//, options.addTo(bdvh));

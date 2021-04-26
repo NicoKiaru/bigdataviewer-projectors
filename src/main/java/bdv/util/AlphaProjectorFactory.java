@@ -46,20 +46,20 @@ public class AlphaProjectorFactory implements AccumulateProjectorFactory<ARGBTyp
         {
             int aSum = 0, rSum = 0, gSum = 0, bSum = 0;
             int length = accesses.length-1;
-            /*for (int iSource = 0; iSource<length; iSource+=2) {
+            for (int iSource = 0; iSource<length; iSource+=2) {
                 final Cursor< ? extends ARGBType > access = accesses[iSource];
                 final Cursor< ? extends ARGBType > access_alpha = accesses[iSource+1];
                 final float alpha = Float.intBitsToFloat(access_alpha.get().get());
                 final int value = access.get().get();
                 final int a = (int) (ARGBType.alpha( value )*alpha);
                 final int r = (int) (ARGBType.red( value )*alpha);
-                final int g = (int) (ARGBType.green( value ));
-                final int b = (int) (ARGBType.blue( value ));
+                final int g = (int) (ARGBType.red( value )*alpha);
+                final int b = (int) (ARGBType.red( value )*alpha);
                 aSum += a;
                 rSum += r;
                 gSum += g;
                 bSum += b;
-            }*/
+            }
 
             /*for ( final Cursor< ? extends ARGBType > access : accesses )
             {

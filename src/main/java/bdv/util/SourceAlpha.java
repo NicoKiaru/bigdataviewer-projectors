@@ -55,7 +55,7 @@ public class SourceAlpha implements Source<FloatType> {
         final float finalAlpha = alpha;
 
         final RandomAccessible< FloatType > randomAccessible =
-                new FunctionRandomAccessible<>( 3, () -> (loc, out) -> out.setReal( finalAlpha ), FloatType::new );
+                new FunctionRandomAccessible<>( 3, () -> (loc, out) -> out.setReal( finalAlpha*loc.getIntPosition(0)/120.0 ), FloatType::new );
 
         return Views.interval(randomAccessible, origin.getSource(t, level));
     }
