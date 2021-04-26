@@ -11,11 +11,10 @@ import net.imglib2.type.numeric.ARGBType;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicInteger;
 
-public class SlowProjectorFactory implements AccumulateProjectorFactory<ARGBType> {
+public class AlphaProjectorFactory implements AccumulateProjectorFactory<ARGBType> {
 
-    public SlowProjectorFactory() {
+    public AlphaProjectorFactory() {
         System.out.print(this.getClass()+"\t");
     }
 
@@ -42,19 +41,27 @@ public class SlowProjectorFactory implements AccumulateProjectorFactory<ARGBType
             super( sourceProjectors, sources, target, numThreads, executorService );
         }
 
-        AtomicInteger sheep_counter = new AtomicInteger();
-
         @Override
         protected void accumulate(final Cursor< ? extends ARGBType >[] accesses, final ARGBType target )
         {
             int aSum = 0, rSum = 0, gSum = 0, bSum = 0;
+            int length = accesses.length-1;
+            /*for (int iSource = 0; iSource<length; iSource+=2) {
+                final Cursor< ? extends ARGBType > access = accesses[iSource];
+                final Cursor< ? extends ARGBType > access_alpha = accesses[iSource+1];
+                final float alpha = Float.intBitsToFloat(access_alpha.get().get());
+                final int value = access.get().get();
+                final int a = (int) (ARGBType.alpha( value )*alpha);
+                final int r = (int) (ARGBType.red( value )*alpha);
+                final int g = (int) (ARGBType.green( value ));
+                final int b = (int) (ARGBType.blue( value ));
+                aSum += a;
+                rSum += r;
+                gSum += g;
+                bSum += b;
+            }*/
 
-            // Counting sheeps
-            for (int i=0;i<50;i++) {
-                sheep_counter.incrementAndGet();
-            }
-
-            for ( final Cursor< ? extends ARGBType > access : accesses )
+            /*for ( final Cursor< ? extends ARGBType > access : accesses )
             {
                 final int value = access.get().get();
                 final int a = ARGBType.alpha( value );
@@ -65,7 +72,7 @@ public class SlowProjectorFactory implements AccumulateProjectorFactory<ARGBType
                 rSum += r;
                 gSum += g;
                 bSum += b;
-            }
+            }*/
             if ( aSum > 255 )
                 aSum = 255;
             if ( rSum > 255 )
@@ -78,4 +85,3 @@ public class SlowProjectorFactory implements AccumulateProjectorFactory<ARGBType
         }
     }
 }
-

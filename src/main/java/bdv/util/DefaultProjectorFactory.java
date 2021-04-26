@@ -26,9 +26,11 @@ public class DefaultProjectorFactory implements AccumulateProjectorFactory<ARGBT
             final int numThreads,
             final ExecutorService executorService )
     {
+        //System.out.println(sourceProjectors.size()+"\t"+sources.size()+"\t"+sourceScreenImages.size());
         try
         {
-            // I couldn't find any perf improvement for this one when the two sources are displayed
+
+          // I couldn't find any perf improvement for this one when the two sources are displayed
           return new AccumulateProjectorARGB( sourceProjectors, sourceScreenImages, targetScreenImage, numThreads, executorService );
         }
         catch ( IllegalArgumentException ignored )

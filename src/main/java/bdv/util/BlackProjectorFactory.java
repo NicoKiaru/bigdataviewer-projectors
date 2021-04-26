@@ -11,11 +11,14 @@ import net.imglib2.type.numeric.ARGBType;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicInteger;
 
-public class SlowProjectorFactory implements AccumulateProjectorFactory<ARGBType> {
+/**
+ * Just always return a black image
+ */
 
-    public SlowProjectorFactory() {
+public class BlackProjectorFactory implements AccumulateProjectorFactory<ARGBType> {
+
+    public BlackProjectorFactory() {
         System.out.print(this.getClass()+"\t");
     }
 
@@ -42,40 +45,10 @@ public class SlowProjectorFactory implements AccumulateProjectorFactory<ARGBType
             super( sourceProjectors, sources, target, numThreads, executorService );
         }
 
-        AtomicInteger sheep_counter = new AtomicInteger();
-
         @Override
         protected void accumulate(final Cursor< ? extends ARGBType >[] accesses, final ARGBType target )
         {
-            int aSum = 0, rSum = 0, gSum = 0, bSum = 0;
-
-            // Counting sheeps
-            for (int i=0;i<50;i++) {
-                sheep_counter.incrementAndGet();
-            }
-
-            for ( final Cursor< ? extends ARGBType > access : accesses )
-            {
-                final int value = access.get().get();
-                final int a = ARGBType.alpha( value );
-                final int r = ARGBType.red( value );
-                final int g = ARGBType.green( value );
-                final int b = ARGBType.blue( value );
-                aSum += a;
-                rSum += r;
-                gSum += g;
-                bSum += b;
-            }
-            if ( aSum > 255 )
-                aSum = 255;
-            if ( rSum > 255 )
-                rSum = 255;
-            if ( gSum > 255 )
-                gSum = 255;
-            if ( bSum > 255 )
-                bSum = 255;
-            target.set( ARGBType.rgba( rSum, gSum, bSum, aSum ) );
+            target.set( ARGBType.rgba( 0, 0, 0, 0 ) );
         }
     }
 }
-
